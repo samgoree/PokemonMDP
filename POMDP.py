@@ -20,7 +20,7 @@ epsilon = 10**-6
 class POMDP:
 	# state_attribute_values should be a list of the number of possible values for each attribute of a gamestate, the "shape" of state space
 	# num_actions_possible is the number of total possible actions that exist
-	# value_function is a function that takes a state and action and outputs the integer value
+	# value_function is a function that takes a state two states and outputs the integer value
 	def __init__(self, state_attribute_values, num_actions_possible, value_function):
 		self.state_attribute_values = state_attribute_values
 		self.num_actions_possible = num_actions_possible
@@ -42,6 +42,14 @@ class POMDP:
 			stride *= attribute
 		return index
 
+	def int_to_state(self, index):
+		rev_state = []
+		for i,attribute in reversed(list(enumerate(self.state_attribute_values))):
+			print(rev_state)
+			rev_state.append(index % attribute)
+			index //= attribute
+		rev_state.reverse()
+		return rev_state
 
 
 	def getMove(self, state):
@@ -49,7 +57,7 @@ class POMDP:
 
 	def update(self, start_state, end_state, action):
 		self.freqs[action, self.state_to_int(start_state), self.state_to_int(end_state)] +=1
-		self.reward_frequencies[self.state_to_int(start_state), action] += self.value_function(start_state, action)
+		self.reward_frequencies[self.state_to_int(start_state), action] += self.value_function(start_state, end_state)
 
 	# this function is computationally expensive and should not be called mid-game!
 	# stochastic adds gaussian noise to probabilities so that the policy doesn't deterministically depend on the frequencies
@@ -142,6 +150,16 @@ class POMDP:
 				for j,val in enumerate(lines[line_num].split(',')):
 					self.reward_frequencies[i,j] += val
 				line_num += 1
+	def save_policy(self, path):
+		f = open(path, w)
+		# enumerate every possible gamestate
+		for i in range(np.prod(self.state_attribute_values)):
+			state = int_to_state(i)
+			s = str(state) + ':' + str(self.policy[i]) + '\n'
+			f.write(s)
+
+				
+
 
 def test():
 	import mdptoolbox.example
@@ -155,7 +173,7 @@ def test():
 			# sample state from dist in P[action,first_state]
 			second_state = [np.random.choice(len(P[action,first_state[0]]), 1, p=P[action,first_state[0]])]
 			mdp.update(first_state, second_state, action)
-			total_reward += mdp.value_function(first_state, action)
+			total_reward += mdp.value_function(first_state, second_state)
 		print("Trial", i,"Total reward:", total_reward)
 		mdp.generate_policy()
 	print(mdp.policy)
