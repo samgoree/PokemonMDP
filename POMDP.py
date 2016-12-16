@@ -27,6 +27,7 @@ class POMDP:
 		self.value_function = value_function
 		num_states = np.prod(state_attribute_values)
 		# initialize Actions * States * States array of frequencies, let each start with a pseudocount of 1
+		
 		self.freqs = np.ones([num_actions_possible, num_states, num_states], dtype=np.int32)
 		# initialize matrix tracking rewards, states by actions
 		self.reward_frequencies = np.ones([num_states, num_actions_possible], dtype=np.int32)
@@ -45,7 +46,6 @@ class POMDP:
 	def int_to_state(self, index):
 		rev_state = []
 		for i,attribute in reversed(list(enumerate(self.state_attribute_values))):
-			print(rev_state)
 			rev_state.append(index % attribute)
 			index //= attribute
 		rev_state.reverse()
@@ -71,18 +71,19 @@ class POMDP:
 			freqs = np.float32(self.freqs) + np.random.normal(scale=stddev, size=self.freqs.shape)
 		else:
 			freqs = self.freqs
-		P = np.zeros_like(self.freqs, dtype=np.float32)
+		P = np.zeros_like(self.freqs, dtype=np.float64)
 		for i, action in enumerate(self.freqs):
 			for j, state in enumerate(action):
 				total = np.sum(state)
 				for k, state2 in enumerate(state):
 					P[i,j,k] = state2 / total
 				P[i,j,-1] = 1 - np.sum(P[i,j,:-1])
-				assert np.sum(P[i,j]) == 1
+				#assert np.sum(P[i,j]) == 1
 
 		# This might be dumb, I'm just using the reward frequencies (i.e. each time we have a good or bad thing happen we
 		# increment/decrement reward frequency so that eventually it probably resembles a reward function)
-		if verbose: print('probability matrix\n', P)
+		print(P[P<0])
+		P = np.maximum(np.zeros_like(P), P)
 		mdp = mdptoolbox.mdp.PolicyIterationModified(P, self.reward_frequencies, 0.9)
 		mdp.run()
 		# a policy is a list of all the states, where the value in position i is the index of the best move to make in position i
@@ -151,10 +152,10 @@ class POMDP:
 					self.reward_frequencies[i,j] += val
 				line_num += 1
 	def save_policy(self, path):
-		f = open(path, w)
+		f = open(path, 'w')
 		# enumerate every possible gamestate
 		for i in range(np.prod(self.state_attribute_values)):
-			state = int_to_state(i)
+			state = self.int_to_state(i)
 			s = str(state) + ':' + str(self.policy[i]) + '\n'
 			f.write(s)
 

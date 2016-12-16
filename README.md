@@ -7,11 +7,14 @@ The architecture we envision has two components: a “frontend” that interface
 
 The internals of the backend will probably be tabular -- a MDP is a five-tuple of a finite set of states, a finite set of actions, probabilities that actions taken in a given state will lead to a certain other state, expected rewards from a given state and action and a discount factor, which tells us how much to prioritize short-term rewards over long-term rewards. All of these will be stored in lists and built on-line according to the algorithm in Arvey and Aaron -- every move will add to the stored data and new transition probabilities/expected rewards will be computed periodically.
 
+While the on-line training procedure didn't end up working out, we did manage to build a working MDP, train it on game logs and output a policy that could control a bot we wrote in javascript (a [fork](https://github.com/samgoree/leftovers-again) of [leftovers-again](https://github.com/dramamine/leftovers-again)).
 
-Alternatively if Professor Eck is ok with it, we’ll use code modified from a library (https://github.com/sawcordwell/pymdptoolbox) for the backend and save time.
+## To Use:
 
-
-So far we haven’t made any progress on the implementation, though we have constructed the two teams to pair off against one another with help from a third-party consultant (our friend, who used to be a moderator on pokemonshowdown.com).
-
-
-We still need to construct the front end (the program which will interface with the pokemon showdown servers) and our backend (the program which makes the choices for each team in our simulation). The length of time budgeted for each part will likely need to be at least a couple of weeks. However, if we’re allowed to use libraries for any of the machine learning, that should reduce the amount of time we’ll need to budget for the backend. Because of that, I think our timeline should be such that we start by early November, finish the front end first since we can’t test either of the others without it, and then the backend.
+0. Make sure you have python installed, with numpy and scipy (I like [Anaconda](https://www.continuum.io/downloads), since it ships with both)
+1. Install PyMDPToolbox using pip (follow the instructions at https://github.com/sawcordwell/pymdptoolbox) or by calling python setup.py install in the included pymdptoolbox directory
+2. Install pokemon showdown server (follow the instructions at https://github.com/zarel/Pokemon-Showdown), in the included Pokemon-Showdown directory
+3. call python MDPRecorder.py and put the training data (in JSON format, like testout3) into stdin (I did this by using cat ../game/log/directory/output* | MDPRecorder.py to train on lots of game logs)
+4. MDPRecorder.py will save a policy to 'policy.txt' in the same directory
+5. move policy.txt to leftovers-again/src/bots/mdp
+6. start your pokemon showdown server, then call npm start -- mdp --opponent=<other bot name, for instance, meethefakers>
