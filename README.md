@@ -11,10 +11,10 @@ While the on-line training procedure didn't end up working out, we did manage to
 
 ## To Use:
 
-0. Make sure you have python installed, with numpy and scipy (I like [Anaconda](https://www.continuum.io/downloads), since it ships with both)
+0. Make sure you have python installed, with numpy and scipy (I like [Anaconda](https://www.continuum.io/downloads), since it ships with both). Also make sure you have nodejs and npm installed (you can find those [here](https://nodejs.org/en/download/))
 1. Install PyMDPToolbox using pip (follow the instructions at https://github.com/sawcordwell/pymdptoolbox) or by calling python setup.py install in the included pymdptoolbox directory
 2. Install pokemon showdown server (follow the instructions at https://github.com/zarel/Pokemon-Showdown), in the included Pokemon-Showdown directory
 3. call python MDPRecorder.py and put the training data (in JSON format, like testout3) into stdin (I did this by using cat ../game/log/directory/output* | MDPRecorder.py to train on lots of game logs)
 4. MDPRecorder.py will save a policy to 'policy.txt' in the same directory
 5. move policy.txt to leftovers-again/src/bots/mdp
-6. start your pokemon showdown server, then call npm start -- mdp --opponent=<other bot name, for instance, meethefakers>
+6. start your pokemon showdown server, then call npm start -- mdp --opponent=\<other bot name, for instance, meethefakers\>
